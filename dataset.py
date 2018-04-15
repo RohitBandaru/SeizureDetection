@@ -51,7 +51,7 @@ def train_val_split(data,labels,split):
 
 	return train_data, train_labels, val_data, val_labels
 
-data, labels = get_data(1)
+data, labels = get_data(2)
 
 train_data, train_labels, val_data, val_labels = train_val_split(data, labels, .7)
 
