@@ -2,13 +2,15 @@ import feature_extractor as fe
 from os import listdir
 import scipy.io as spio
 import numpy as np
+
 '''
 data: (m,n)
 '''
 def directory_data(path):
 	data = None
 	files = listdir(path)
-	for i, file in enumerate(files):
+	print(str(len(files))+" number of points")
+	for file in files:
 		file_data = spio.loadmat(path+file)["data"]
 		vec = fe.extract_feature(file_data)
 		if data is None:
@@ -22,24 +24,24 @@ def get_data(patient_number):
 	ictal_train = directory_data("data/patient_"+str(patient_number)+"/ictal train/")
 	non_ictal_train = directory_data("data/patient_"+str(patient_number)+"/non-ictal train/")
 
-	n_ictal = ictal_train.shape[1]
-	n_non_ictal = ictal_train.shape[1]
+	m_ictal = ictal_train.shape[0]
+	m_non_ictal = ictal_train.shape[0]
 
-	train_data = np.vstack([ictal_train, non_ictal_train])
-	labels = np.hstack([np.ones((n_ictal)),np.zeros((n_non_ictal))])
+	data = np.vstack([ictal_train, non_ictal_train])
+	labels = np.hstack([np.ones((m_ictal)),np.zeros((m_non_ictal))])
 
 	# shuffle data
 	rand_idx = np.random.permutation(labels.shape[0])
 
 	labels = labels[rand_idx]
-	train_data  = train_data[rand_idx,:]
+	data  = data[rand_idx,:]
 
-	return train_data, labels
+	return data, labels
 
 def train_val_split(data,labels,split):
 	m = data.shape[0]
 	train_m = int(m*split)
-	vali_m = m - train_m
+	val_m = m - train_m
 
 	train_data = data[:train_m,:]
 	train_labels = labels[:train_m]
@@ -53,6 +55,11 @@ data, labels = get_data(1)
 
 train_data, train_labels, val_data, val_labels = train_val_split(data, labels, .7)
 
+print(train_data.shape)
+print(train_labels.shape)
+print(val_data.shape)
+print(val_labels.shape)
+print(val_data[1,:])
 from sklearn.svm import SVC
 clf = SVC()
 clf.fit(train_data, train_labels)
