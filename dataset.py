@@ -11,6 +11,7 @@ def directory_data(path):
 	files = listdir(path)
 	print(str(len(files))+" number of points")
 	for file in files:
+		print("extracting "+file)
 		file_data = spio.loadmat(path+file)["data"]
 		vec = fe.extract_feature(file_data)
 		if data is None:
