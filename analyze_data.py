@@ -3,18 +3,17 @@ from scipy import signal
 import pywt
 import matplotlib.pyplot as plt
 import numpy as np
-
+import feature_extractor as fe
 path1 = "data/patient_2/ictal train/patient_2_121.mat"
 
 path = "data/patient_1/ictal train/patient_1_1.mat"
-path_t = "data/patient_1/ictal train/patient_1_1.mat"
-data = spio.loadmat(path1)["data"]
+path_t = "data/patient_3/test/patient_3_test_1947.mat"
+data = spio.loadmat(path_t)["data"]
 
 print(data.shape)
-print(np.var(data/(np.mean(data,axis=0)),axis=0))
-channels_num = 10
-channels = np.argsort(-np.var(data, axis=0))[0:channels_num]
-print(channels)
+
+vec = fe.extract_feature(data)
+print(vec)
 '''print(data.shape)
 wp = pywt.WaveletPacket2D(data=data, wavelet='db1', mode='symmetric')
 
