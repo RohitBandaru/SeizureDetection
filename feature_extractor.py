@@ -8,6 +8,11 @@ data: (t,c)
 '''
 def extract_feature(data):
 	n_t, n_c = data.shape
+
+	channels_num = 5
+	channels = np.argsort(-np.var(data, axis=0))[0:channels_num]
+	data = data[:,channels]
+	n_c = channels_num
 	feature = np.zeros(n_c*4)
 	for channel_number in range(n_c):
 		wp = pywt.WaveletPacket(data=data[:,channel_number], wavelet='db1', mode='symmetric')
@@ -16,7 +21,6 @@ def extract_feature(data):
 			for j in range(n_l):
 				feature[channel_number*4+i] += np.log(np.sum(wp.get_level(i+1)[j].data).clip(min=0.00000001))
 	window_num = 1
-	channels_num = 5
 
 	ll = line_length(data, window_num, channels_num).flatten()
 	en = energy(data, window_num, channels_num).flatten()
@@ -26,10 +30,7 @@ def extract_feature(data):
 	feature = np.append(feature, [ll,en,va,po])
 	return feature
 
-
-
 # HW2 Functions
-
 
 def line_length(data, window_num, channels_num):
 	m, n = data.shape
@@ -49,9 +50,9 @@ def line_length(data, window_num, channels_num):
 			line_length = np.vstack([line_length, window_ll])
 	# sort channels in descending order by mean value, 
 	# and select the 5 channels with the highest max line length
-	channels = np.argsort(np.max(-line_length, axis = 0))[0:channels_num]
+	'''channels = np.argsort(np.max(-line_length, axis = 0))[0:channels_num]
 	print("most important channels: ", channels)
-	line_length = line_length[:,channels]
+	line_length = line_length[:,channels]'''
 	return line_length
 
 def energy(data, window_num, channels_num):
@@ -69,9 +70,9 @@ def energy(data, window_num, channels_num):
 		else:
 			energy = np.vstack([energy, window_energy])
 	# select the channels with the highest max energy
-	channels = np.argsort(np.max(-energy, axis = 0))[0:channels_num]
+	'''channels = np.argsort(np.max(-energy, axis = 0))[0:channels_num]
 	print("most important channels: ", channels)
-	energy = energy[:,channels]
+	energy = energy[:,channels]'''
 	return energy
 
 def variance(data, window_num, channels_num):
@@ -89,9 +90,9 @@ def variance(data, window_num, channels_num):
 		else:
 			variance = np.vstack([variance, window_variance])
 	# select the channels with the highest max variance
-	channels = np.argsort(np.max(-variance, axis = 0))[0:channels_num]
+	'''channels = np.argsort(np.max(-variance, axis = 0))[0:channels_num]
 	print("most important channels: ", channels)
-	variance = variance[:,channels]
+	variance = variance[:,channels]'''
 	return variance
 
 def power(data, window_num, channels_num):
@@ -114,7 +115,7 @@ def power(data, window_num, channels_num):
 		else:
 			power = np.vstack([power, window_power])
 	# select the channels with the highest max spectral power in the bands
-	channels = np.argsort(np.max(-power, axis = 0))[0:channels_num]
+	'''channels = np.argsort(np.max(-power, axis = 0))[0:channels_num]
 	print("most important channels: ", channels)
-	power = power[:,channels]
+	power = power[:,channels]'''
 	return power

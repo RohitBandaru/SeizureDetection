@@ -10,8 +10,8 @@ def directory_data(path):
 	data = None
 	files = listdir(path)
 	print(str(len(files))+" number of points")
-	for file in files:
-		print("extracting "+file)
+	for i, file in enumerate(files):
+		print(str(i+1)+"/"+str(len(files))+": extracting "+file)
 		file_data = spio.loadmat(path+file)["data"]
 		vec = fe.extract_feature(file_data)
 		if data is None:
@@ -51,24 +51,5 @@ def train_val_split(data,labels,split):
 	val_labels = labels[train_m:]
 
 	return train_data, train_labels, val_data, val_labels
-
-data, labels = get_data(2)
-
-train_data, train_labels, val_data, val_labels = train_val_split(data, labels, .7)
-
-print(train_data.shape)
-print(train_labels.shape)
-print(val_data.shape)
-print(val_labels.shape)
-print(val_data[1,:])
-from sklearn.svm import SVC
-clf = SVC()
-clf.fit(train_data, train_labels)
-y_pred = clf.predict(val_data)
-
-from sklearn.metrics import accuracy_score
-print(y_pred)
-print(accuracy_score(y_pred, val_labels))
-
 
 
