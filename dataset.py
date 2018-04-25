@@ -7,41 +7,41 @@ import numpy as np
 data: (m,n)
 '''
 def directory_data(path):
-        #print(path)
-	data = None
 	files = listdir(path)
 	print(str(len(files))+" number of points")
+	data = None 
+
 	for i, file in enumerate(files):
 		print(str(i+1)+"/"+str(len(files))+": extracting "+file)
 		file_data = spio.loadmat(path+file)["data"]
-		vec = fe.extract_feature(file_data)
+		vec = fe.extract_feature2(file_data)
 		if data is None:
-			data = vec
-		else:
-			data = np.vstack([data, vec])
+			data = np.zeros((len(files),vec.shape[0]))
+		data[i,:] = vec
+	print("directory data shape", data.shape)
 	return data
 
 
 def get_data(patient_number):
         #dir_name = "C:/Users/Aasta/Documents/CU SP 18/ECE 5040/"
-	ictal_train = directory_data(  "data/patient_"+str(patient_number)+"/ictal train/")
+	ictal_train = directory_data("data/patient_"+str(patient_number)+"/ictal train/")
 	non_ictal_train = directory_data("data/patient_"+str(patient_number)+"/non-ictal train/")
 
 	m_ictal = ictal_train.shape[0]
-	m_non_ictal = ictal_train.shape[0]
+	m_non_ictal = non_ictal_train.shape[0]
 
 	data = np.vstack([ictal_train, non_ictal_train])
 	labels = np.hstack([np.ones((m_ictal)),np.zeros((m_non_ictal))])
 
+	return data, labels
+
+def train_val_split(data,labels,split):
 	# shuffle data
 	rand_idx = np.random.permutation(labels.shape[0])
 
 	labels = labels[rand_idx]
 	data  = data[rand_idx,:]
 
-	return data, labels
-
-def train_val_split(data,labels,split):
 	m = data.shape[0]
 	train_m = int(m*split)
 	val_m = m - train_m

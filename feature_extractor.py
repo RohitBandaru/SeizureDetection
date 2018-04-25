@@ -1,6 +1,6 @@
 import numpy as np
 import pywt
-#from pywt import wavedec
+from pywt import wavedec
 import scipy.io as spio
 from scipy import signal
 import scipy.signal as sg
@@ -53,37 +53,42 @@ def extract_feature2(data):
 	data = data[:,channels]
 	n_c = channels_num
 	feature = []
-	
-	print("xxxxx")
+
 	for channel_number in range(n_c):
 		#filtered_data = sg.filtfilt(high_pass, [1.0], numpy.asarray(data[:,channel_number]))
 		#print(filtered_data)
 		coeffs = wavedec(data = data[:, channel_number], wavelet='db4', mode = 'symmetric', level = 5)
 		cA5, cD5, cD4, cD3, cD2, cD1 = coeffs
-		coeffs = np.array([cA5, cD5,cD4, cD3, cD2, cD1])
-		print(coeffs)
-		print(coeffs.shape)
-		#ll = line_length(coeffs).flatten()
-		en = energy(coeffs).flatten()
-		va = variance(coeffs).flatten()
-		po = power(coeffs).flatten()
-		abs_co = abs_val_coeff(coeffs).flatten()
-		std = stdev(coeffs).flatten()
-		feature.extend(ll, en, va, po, abs_co, std)
-	#ll = line_length(data).flatten()
-	#en = energy(data).flatten()
-	#va = variance(data).flatten()
-	#po = power(data).flatten()
+		for c in coeffs:
+			en = energy_coeff(c)
+			va = variance_coeff(c)
+			abs_co = abs_val_coeff(c)
+			std = stdev_coeff(c)
+		
+			feature.extend([en, va, abs_co, std])
 
-	#feature = np.append(feature, [ll,en,va,po])
 	feature = np.asarray(feature)
 	return feature
 	
-
-# HW2 Functions
+# not axis function
 
 def abs_val_coeff(data):
-	return np.mean(np.abs(data), axis = 0)
+	return np.mean(np.abs(data))
+
+def stdev_coeff(data):
+	return np.std(data)
+
+def energy_coeff(data):
+	#m, n = data.shape
+	energy = np.sum(np.square(np.abs(data)))
+	return energy
+
+def variance_coeff(data):
+	variance = np.sum(np.square(data - np.mean(data)))
+	return variance
+
+
+# axis functions
 
 def stdev(data):
 	return np.std(data, axis = 0)

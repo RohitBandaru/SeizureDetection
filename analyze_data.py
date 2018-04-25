@@ -12,7 +12,7 @@ data = spio.loadmat(path_t)["data"]
 
 print(data.shape)
 
-vec = fe.extract_feature(data)
+vec = fe.extract_feature2(data)
 print(vec)
 '''print(data.shape)
 wp = pywt.WaveletPacket2D(data=data, wavelet='db1', mode='symmetric')
