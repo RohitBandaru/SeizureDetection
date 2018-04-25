@@ -7,6 +7,7 @@ import numpy as np
 data: (m,n)
 '''
 def directory_data(path):
+        #print(path)
 	data = None
 	files = listdir(path)
 	print(str(len(files))+" number of points")
@@ -22,7 +23,8 @@ def directory_data(path):
 
 
 def get_data(patient_number):
-	ictal_train = directory_data("data/patient_"+str(patient_number)+"/ictal train/")
+        #dir_name = "C:/Users/Aasta/Documents/CU SP 18/ECE 5040/"
+	ictal_train = directory_data(  "data/patient_"+str(patient_number)+"/ictal train/")
 	non_ictal_train = directory_data("data/patient_"+str(patient_number)+"/non-ictal train/")
 
 	m_ictal = ictal_train.shape[0]
