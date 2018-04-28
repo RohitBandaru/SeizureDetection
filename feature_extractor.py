@@ -4,6 +4,7 @@ from pywt import wavedec
 import scipy.io as spio
 from scipy import signal
 import scipy.signal as sg
+import scipy.stats as stats
 '''
 data: (t,c)
 '''
@@ -69,13 +70,21 @@ def extract_feature2(data):
 			std = stdev_coeff(c)
 			min1 = np.min(c)
 			max1 = np.max(c)
-			
-			feature.extend([en, va, abs_co, std, min1, max1])
-			'''
-			feature = np.append(feature,c)
-			'''
+			ent = stats.entropy(c)
 
-	feature = np.asarray(feature)
+			feature = np.append(feature,[en, va, abs_co, std, min1, max1, ent])
+			feature[np.isneginf(feature)] = 0
+			#feature = np.append(feature,c)
+	'''		
+	ll = line_length(data).flatten()
+	en = energy(data).flatten()
+	va = variance(data).flatten()
+	po = power(data).flatten()
+	ku = kurtosis(data).flatten()
+	sk = skew(data).flatten()
+
+	feature = np.append(feature, [ll,en,va,po,ku,sk])
+	'''
 	return feature
 	
 # not axis function
@@ -97,6 +106,11 @@ def variance_coeff(data):
 
 
 # axis functions
+def kurtosis(data):
+	return stats.kurtosis(data, axis=0, bias=False)
+
+def skew(data):
+	return stats.skew(data, axis=0, bias=True)
 
 def stdev(data):
 	return np.std(data, axis = 0)

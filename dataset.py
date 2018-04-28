@@ -36,12 +36,14 @@ def get_data(patient_number, channels):
 
 	return data, labels
 
-def directory_data50(path,channels_num):
+def directory_data_sample(path,channels_num, sample):
+	import random
 	files = listdir(path)
+	random.shuffle(files)
 	data = None 
 
 	for i, file in enumerate(files):
-		if(i>50):
+		if(i>sample):
 			break
 		file_data = spio.loadmat(path+file)["data"]
 		vec = np.argsort(-np.var(file_data, axis=0))[0:channels_num]
@@ -50,9 +52,9 @@ def directory_data50(path,channels_num):
 		data[i,:] = vec
 	return data
 
-def get_channels(patient_number, channels_num):
-	ictal_train = directory_data50("data/patient_"+str(patient_number)+"/ictal train/", channels_num)
-	non_ictal_train = directory_data50("data/patient_"+str(patient_number)+"/non-ictal train/", channels_num)
+def get_channels(patient_number, channels_num, sample):
+	ictal_train = directory_data_sample("data/patient_"+str(patient_number)+"/ictal train/", channels_num, sample)
+	non_ictal_train = directory_data_sample("data/patient_"+str(patient_number)+"/non-ictal train/", channels_num, sample)
 	data = np.vstack([ictal_train, non_ictal_train])
 	return np.argsort(np.bincount(data.astype(int).flatten()))[-channels_num:]
 	
