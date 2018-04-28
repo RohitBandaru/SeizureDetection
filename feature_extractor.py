@@ -10,7 +10,7 @@ data: (t,c)
 def extract_feature(data):
 	n_t, n_c = data.shape
 
-	channels_num = 3
+	channels_num = 1
         #print("xxx")
 	#window = sg.get_window('hamming', numpy.asarray(len(data)) )
         #print(type(window))
@@ -20,7 +20,7 @@ def extract_feature(data):
 	channels = np.argsort(-np.var(data, axis=0))[0:channels_num]
 	data = data[:,channels]
 	n_c = channels_num
-	feature = np.zeros(n_c*4)
+	feature = np.zeros(0)
 	for channel_number in range(n_c):
 		#filtered_data = sg.filtfilt(high_pass, [1.0], numpy.asarray(data[:,channel_number]))
 		#print(filtered_data)
@@ -39,19 +39,21 @@ def extract_feature(data):
 	feature = np.append(feature, [ll,en,va,po])
 	return feature
 
+
+
 def extract_feature2(data):
 
 	n_t, n_c = data.shape
 
-	channels_num = 3
+	channels_num = 5
         #print("xxx")
 	#window = sg.get_window('hamming', numpy.asarray(len(data)) )
         #print(type(window))
 	#print(window)
 	#high_pass = sg.firwin(numtaps = 48, cutoff = 0.16, width = None, window = window )
-	channels = np.argsort(-np.var(data, axis=0))[0:channels_num]
+	'''channels = np.argsort(-np.var(data, axis=0))[0:channels_num]
 	data = data[:,channels]
-	n_c = channels_num
+	n_c = channels_num'''
 	feature = []
 
 	for channel_number in range(n_c):
@@ -60,12 +62,18 @@ def extract_feature2(data):
 		coeffs = wavedec(data = data[:, channel_number], wavelet='db4', mode = 'symmetric', level = 5)
 		cA5, cD5, cD4, cD3, cD2, cD1 = coeffs
 		for c in coeffs:
+
 			en = energy_coeff(c)
 			va = variance_coeff(c)
 			abs_co = abs_val_coeff(c)
 			std = stdev_coeff(c)
-		
-			feature.extend([en, va, abs_co, std])
+			min1 = np.min(c)
+			max1 = np.max(c)
+			
+			feature.extend([en, va, abs_co, std, min1, max1])
+			'''
+			feature = np.append(feature,c)
+			'''
 
 	feature = np.asarray(feature)
 	return feature

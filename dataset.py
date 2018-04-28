@@ -3,10 +3,11 @@ from os import listdir
 import scipy.io as spio
 import numpy as np
 
+
 '''
 data: (m,n)
 '''
-def directory_data(path):
+def directory_data(path, channels):
 	files = listdir(path)
 	print(str(len(files))+" number of points")
 	data = None 
@@ -14,7 +15,7 @@ def directory_data(path):
 	for i, file in enumerate(files):
 		print(str(i+1)+"/"+str(len(files))+": extracting "+file)
 		file_data = spio.loadmat(path+file)["data"]
-		vec = fe.extract_feature2(file_data)
+		vec = fe.extract_feature2(file_data[:,channels])
 		if data is None:
 			data = np.zeros((len(files),vec.shape[0]))
 		data[i,:] = vec
@@ -22,10 +23,10 @@ def directory_data(path):
 	return data
 
 
-def get_data(patient_number):
+def get_data(patient_number, channels):
         #dir_name = "C:/Users/Aasta/Documents/CU SP 18/ECE 5040/"
-	ictal_train = directory_data("data/patient_"+str(patient_number)+"/ictal train/")
-	non_ictal_train = directory_data("data/patient_"+str(patient_number)+"/non-ictal train/")
+	ictal_train = directory_data("data/patient_"+str(patient_number)+"/ictal train/", channels)
+	non_ictal_train = directory_data("data/patient_"+str(patient_number)+"/non-ictal train/", channels)
 
 	m_ictal = ictal_train.shape[0]
 	m_non_ictal = non_ictal_train.shape[0]
@@ -34,6 +35,27 @@ def get_data(patient_number):
 	labels = np.hstack([np.ones((m_ictal)),np.zeros((m_non_ictal))])
 
 	return data, labels
+
+def directory_data50(path,channels_num):
+	files = listdir(path)
+	data = None 
+
+	for i, file in enumerate(files):
+		if(i>50):
+			break
+		file_data = spio.loadmat(path+file)["data"]
+		vec = np.argsort(-np.var(file_data, axis=0))[0:channels_num]
+		if data is None:
+			data = np.zeros((len(files),vec.shape[0]))
+		data[i,:] = vec
+	return data
+
+def get_channels(patient_number, channels_num):
+	ictal_train = directory_data50("data/patient_"+str(patient_number)+"/ictal train/", channels_num)
+	non_ictal_train = directory_data50("data/patient_"+str(patient_number)+"/non-ictal train/", channels_num)
+	data = np.vstack([ictal_train, non_ictal_train])
+	return np.argsort(np.bincount(data.astype(int).flatten()))[-channels_num:]
+	
 
 def train_val_split(data,labels,split):
 	# shuffle data
