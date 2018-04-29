@@ -75,16 +75,15 @@ def extract_feature2(data):
 			feature = np.append(feature,[en, va, abs_co, std, min1, max1, ent])
 			feature[np.isneginf(feature)] = 0
 			#feature = np.append(feature,c)
-	'''		
+	
 	ll = line_length(data).flatten()
 	en = energy(data).flatten()
 	va = variance(data).flatten()
 	po = power(data).flatten()
 	ku = kurtosis(data).flatten()
 	sk = skew(data).flatten()
-
 	feature = np.append(feature, [ll,en,va,po,ku,sk])
-	'''
+
 	return feature
 	
 # not axis function
