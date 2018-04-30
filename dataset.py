@@ -13,7 +13,7 @@ def directory_data(path, channels):
 	data = None 
 
 	for i, file in enumerate(files):
-		print(str(i+1)+"/"+str(len(files))+": extracting "+file)
+		#print(str(i+1)+"/"+str(len(files))+": extracting "+file)
 		file_data = spio.loadmat(path+file)["data"]
 		vec = fe.extract_feature2(file_data[:,channels])
 		if data is None:
