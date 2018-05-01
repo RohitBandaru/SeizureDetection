@@ -5,54 +5,41 @@ import numpy as np
 import dataset
 
 for patient_number in range(1,8):
-	channels = dataset.get_channels(patient_number, 3, 200)
+	channels = dataset.get_channels(patient_number, 5, 150)
 	print(channels)
 	data, labels = dataset.get_data(patient_number, channels)
+	datac, labelsc = dataset.get_data_coeff(patient_number, channels)
 
-	print(data.shape)
-	print(labels.shape)
 	data = np.nan_to_num(data)
-	#std = np.std(data, axis=0)
-	#mean = np.mean(data, axis=0)
-	max1 = np.max(data, axis=0)
-	data2 = data/max1
-	#data = np.nan_to_num((data-mean)/std)
-	'''
-	from sklearn.decomposition import PCA
-	pca = PCA(n_components=50, whiten = True)
-	pca.fit(data)
-	data2 = pca.transform(data)
-	'''
-	train_data, train_labels, val_data, val_labels = dataset.train_val_split(np.nan_to_num(data2.astype(np.float64)), labels, .75)
+	std = np.std(data, axis=0)
+	mean = np.mean(data, axis=0)
+	#max1 = np.max(data, axis=0)
+	#data2 = data/max1
+	data2 = np.nan_to_num((data-mean)/std)
 
-	print(train_data.shape)
-	print(train_labels.shape)
-	print(val_data.shape)
-	print(val_labels.shape)
+	from sklearn.decomposition import FastICA
+	from sklearn.decomposition import PCA
+	pca = PCA(n_components=100, whiten = True)
+	pca.fit(datac)
+	data2c = pca.transform(datac)
+
+	new_data = np.hstack([data, data2c])
+
+
+	train_data, train_labels, val_data, val_labels = dataset.train_val_split(np.nan_to_num(new_data.astype(np.float64)), labels, .75)
+
 
 	from sklearn.svm import SVC
 	from sklearn.model_selection import KFold
 	from sklearn import metrics
 	from sklearn.ensemble import RandomForestClassifier
 	#### SVM
-	#clf = SVC(C=10, gamma=1000, kernel='rbf',
-	 #  max_iter=10000000, probability=True)
-	clf = RandomForestClassifier(n_estimators=10, max_depth=1, max_features = 20, random_state=0)
+	from sklearn.neural_network import MLPClassifier
+	#### SVM
+	#clf = SVC(C=100, gamma=1, kernel='rbf',
+	 #max_iter=10000000, probability=True)
+	clf = RandomForestClassifier(n_estimators=100, max_depth=10, max_features=5)
 	clf.fit(train_data, train_labels)
-
-	print("training")
-	print(metrics.classification_report(train_labels,clf.predict(train_data)))
-	print(metrics.roc_auc_score(train_labels, clf.predict_proba(train_data)[:,1]))
-	print("\nvalidation")
-	print(metrics.classification_report(val_labels,clf.predict(val_data)))
-	print(metrics.roc_auc_score(val_labels,clf.predict_proba(val_data)[:,1]))
-	print(metrics.accuracy_score(val_labels,clf.predict(val_data)))
-	print("\n")
-
-	fpr, tpr, thresholds = metrics.roc_curve(val_labels, clf.predict_proba(val_data)[:,1], pos_label=1)
-	import matplotlib.pyplot as plt
-	plt.plot(fpr,tpr)
-	print(thresholds)
 
 	path = "data/patient_"+str(patient_number)+"/test/"
 	files = listdir(path)
@@ -65,21 +52,26 @@ for patient_number in range(1,8):
 	f.truncate()
 	f.close()
 	with open(csv_path, 'a') as csvfile:
-	    spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-	    for i, file in enumerate(files):
-	        if file == ".DS_Store":
-	            continue
-	        print(str(i+1)+"/"+str(len(files))+": extracting "+file)
-	        file_data = spio.loadmat(path+file)["data"]
-	        vec = np.nan_to_num(fe.extract_feature2(file_data[:,channels]))
-	        vec = np.nan_to_num(vec/max1)
-	        vec = np.nan_to_num(vec.astype(np.float32))
-	        filename = file[:-4].replace("test_", "")
-	        score = clf.predict_proba(vec.reshape(-1, 1).T)[0,1]
-	        pred = [filename, score]
-	        print(pred)
+		spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+		for i, file in enumerate(files):
+			if file == ".DS_Store":
+				continue
+			print(str(i+1)+"/"+str(len(files))+": extracting "+file)
+			file_data = spio.loadmat(path+file)["data"]
+			vec = np.nan_to_num(fe.extract_feature2(file_data[:,channels]))
+			vec = np.nan_to_num((vec-mean)/std)
 
-	        spamwriter.writerow(pred)
+			vec2 = np.nan_to_num(fe.extract_feature_coeff(file_data[:,channels]))
+			vec2 = np.nan_to_num(pca.transform(vec2.reshape(1,vec2.shape[0])).astype(np.float32))
+
+			vec = np.append(vec,vec2)
+			vec = vec.reshape(1,vec.shape[0])
+			filename = file[:-4].replace("test_", "")
+			score = clf.predict_proba(vec).reshape(-1, 1).T[0,1]
+			pred = [filename, score]
+			print(pred)
+
+			spamwriter.writerow(pred)
 
 ###concatenate all files
 import pandas as pd
@@ -98,4 +90,3 @@ with open("patient.csv", 'a') as csvfile:
             reader = csv.reader(csvfile, delimiter=',', quotechar='|')
             for row in reader:
                 writer.writerow(row)
-

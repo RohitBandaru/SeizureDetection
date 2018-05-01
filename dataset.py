@@ -30,11 +30,43 @@ def get_data(patient_number, channels):
 
 	m_ictal = ictal_train.shape[0]
 	m_non_ictal = non_ictal_train.shape[0]
+	data = data = np.vstack([ictal_train, non_ictal_train])
+	labels = np.hstack([np.ones((m_ictal)),np.zeros((m_non_ictal))])
+	for i in range(int(m_non_ictal/m_ictal) -1):
+		data = np.vstack([ictal_train, data])
+		labels = np.hstack([np.ones((m_ictal)),labels])
+	return data, labels
 
+def directory_data_coeff(path, channels):
+	files = listdir(path)
+	print(str(len(files))+" number of points")
+	data = None 
+
+	for i, file in enumerate(files):
+		print(str(i+1)+"/"+str(len(files))+": extracting "+file)
+		file_data = spio.loadmat(path+file)["data"]
+		vec = fe.extract_feature_coeff(file_data[:,channels])
+		if data is None:
+			data = np.zeros((len(files),vec.shape[0]))
+		data[i,:] = vec
+	print("directory data shape", data.shape)
+	return data
+
+def get_data_coeff(patient_number, channels):
+        #dir_name = "C:/Users/Aasta/Documents/CU SP 18/ECE 5040/"
+	ictal_train = directory_data_coeff("data/patient_"+str(patient_number)+"/ictal train/", channels)
+	non_ictal_train = directory_data_coeff("data/patient_"+str(patient_number)+"/non-ictal train/", channels)
+
+	m_ictal = ictal_train.shape[0]
+	m_non_ictal = non_ictal_train.shape[0]
 	data = np.vstack([ictal_train, non_ictal_train])
 	labels = np.hstack([np.ones((m_ictal)),np.zeros((m_non_ictal))])
-
+	for i in range(int(m_non_ictal/m_ictal) -1):
+		data = np.vstack([ictal_train, data])
+		labels = np.hstack([np.ones((m_ictal)),labels])
 	return data, labels
+
+
 
 def directory_data_sample(path,channels_num, sample):
 	import random

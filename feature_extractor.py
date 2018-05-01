@@ -46,35 +46,7 @@ def extract_feature2(data):
 
 	n_t, n_c = data.shape
 
-	channels_num = 5
-        #print("xxx")
-	#window = sg.get_window('hamming', numpy.asarray(len(data)) )
-        #print(type(window))
-	#print(window)
-	#high_pass = sg.firwin(numtaps = 48, cutoff = 0.16, width = None, window = window )
-	'''channels = np.argsort(-np.var(data, axis=0))[0:channels_num]
-	data = data[:,channels]
-	n_c = channels_num'''
 	feature = []
-
-	for channel_number in range(n_c):
-		#filtered_data = sg.filtfilt(high_pass, [1.0], numpy.asarray(data[:,channel_number]))
-		#print(filtered_data)
-		coeffs = wavedec(data = data[:, channel_number], wavelet='db4', mode = 'symmetric', level = 5)
-		cA5, cD5, cD4, cD3, cD2, cD1 = coeffs
-		for c in coeffs:
-
-			en = energy_coeff(c)
-			va = variance_coeff(c)
-			abs_co = abs_val_coeff(c)
-			std = stdev_coeff(c)
-			min1 = np.min(c)
-			max1 = np.max(c)
-			ent = stats.entropy(c)
-
-			feature = np.append(feature,[en, va, abs_co, std, min1, max1, ent])
-			feature[np.isneginf(feature)] = 0
-			#feature = np.append(feature,c)
 	
 	ll = line_length(data).flatten()
 	en = energy(data).flatten()
@@ -83,7 +55,33 @@ def extract_feature2(data):
 	ku = kurtosis(data).flatten()
 	sk = skew(data).flatten()
 	feature = np.append(feature, [ll,en,va,po,ku,sk])
+	return feature
 
+def extract_feature_coeff(data):
+
+	n_t, n_c = data.shape
+
+	feature = []
+
+	for channel_number in range(n_c):
+		#filtered_data = sg.filtfilt(high_pass, [1.0], numpy.asarray(data[:,channel_number]))
+		#print(filtered_data)
+		coeffs = wavedec(data = data[:, channel_number], wavelet='db4', mode = 'symmetric', level = 5)
+		cA5, cD5, cD4, cD3, cD2, cD1 = coeffs
+		for c in coeffs:
+			'''
+			en = energy_coeff(c)
+			va = variance_coeff(c)
+			abs_co = abs_val_coeff(c)
+			std = stdev_coeff(c)
+			min1 = np.min(c)
+			max1 = np.max(c)
+			
+			feature = np.append(feature,[en, va, abs_co, std, min1, max1])
+			feature[np.isneginf(feature)] = 0
+			'''
+			feature = np.append(feature,c)
+	
 	return feature
 	
 # not axis function
