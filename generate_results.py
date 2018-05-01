@@ -5,7 +5,7 @@ import numpy as np
 import dataset
 
 for patient_number in range(1,8):
-	channels = dataset.get_channels(patient_number, 5, 150)
+	channels = dataset.get_channels(patient_number, 3, 150)
 	print(channels)
 	data, labels = dataset.get_data(patient_number, channels)
 	datac, labelsc = dataset.get_data_coeff(patient_number, channels)
@@ -19,7 +19,7 @@ for patient_number in range(1,8):
 
 	from sklearn.decomposition import FastICA
 	from sklearn.decomposition import PCA
-	pca = PCA(n_components=100, whiten = True)
+	pca = PCA(n_components=220, whiten = True)
 	pca.fit(datac)
 	data2c = pca.transform(datac)
 
@@ -38,7 +38,7 @@ for patient_number in range(1,8):
 	#### SVM
 	#clf = SVC(C=100, gamma=1, kernel='rbf',
 	 #max_iter=10000000, probability=True)
-	clf = RandomForestClassifier(n_estimators=100, max_depth=10, max_features=5)
+	clf = RandomForestClassifier(n_estimators=150, max_depth=3, max_features=15)
 	clf.fit(train_data, train_labels)
 
 	path = "data/patient_"+str(patient_number)+"/test/"
